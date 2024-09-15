@@ -7,8 +7,8 @@ namespace GltfUtility
 		[Option('i', "input", Required = true, HelpText = "The input/output gltf/glb(version 2) file.")]
 		public string InputFile { get; set; }
 
-		[Option('o', "output", Required = false, HelpText = "Name of the output file.")]
-		public string OutputFile { get; set; }
+		[Option('b', "binary", Required = false, HelpText = "Determines whether to save model in binary form(glb).")]
+		public bool Binary { get; set; }
 
 		[Option('t', "tangent", Required = false, HelpText = "Determines whether to generate tangent frames.")]
 		public bool Tangent { get; set; }

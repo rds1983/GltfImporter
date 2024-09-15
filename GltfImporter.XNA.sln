@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GltfImporter.XNA", "GltfImporter\GltfImporter.XNA.csproj", "{E0B57A27-235D-443E-B3B3-1F4B1A6313CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0B57A27-235D-443E-B3B3-1F4B1A6313CA}.Debug|x86.ActiveCfg = Debug|x86
+		{E0B57A27-235D-443E-B3B3-1F4B1A6313CA}.Debug|x86.Build.0 = Debug|x86
+		{E0B57A27-235D-443E-B3B3-1F4B1A6313CA}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}
+	EndGlobalSection
+EndGlobal

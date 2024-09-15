@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
 using CommandLine;
 using GltfImporter;
 using glTFLoader.Schema;
@@ -34,7 +32,36 @@ namespace EffectFarm
 			}
 		}
 
-		static unsafe void GenerateGlb(NodeContent root, Options o)
+		static void ApplyOptionsToNode(NodeContent n, Options o)
+		{
+
+			var asMesh = n as MeshContent;
+			if (asMesh == null)
+			{
+				return;
+			}
+
+			if (o.Tangent)
+			{
+				Logger.LogMessage($"Generating tangent frames for mesh '{n.Name}'.");
+				foreach (GeometryContent geom in asMesh.Geometry)
+				{
+					if (!geom.Vertices.Channels.Contains(VertexChannelNames.Normal(0)))
+					{
+						MeshHelper.CalculateNormals(geom, true);
+					}
+
+					if (!geom.Vertices.Channels.Contains(VertexChannelNames.Tangent(0)) ||
+						!geom.Vertices.Channels.Contains(VertexChannelNames.Binormal(0)))
+					{
+						MeshHelper.CalculateTangentFrames(geom, VertexChannelNames.TextureCoordinate(0), VertexChannelNames.Tangent(0),
+							VertexChannelNames.Binormal(0));
+					}
+				}
+			}
+		}
+
+		static unsafe void SaveGlb(NodeContent root, Options o)
 		{
 			// Gather nodes & meshes
 			var sourceNodes = new List<NodeContent>();
@@ -42,6 +69,8 @@ namespace EffectFarm
 
 			RecursiveAction(root, n =>
 			{
+				ApplyOptionsToNode(n, o);
+
 				sourceNodes.Add(n);
 
 				var asMesh = n as MeshContent;
@@ -148,15 +177,19 @@ namespace EffectFarm
 								case VertexElementUsage.TextureCoordinate:
 									primitive.Attributes["TEXCOORD_" + element.UsageIndex] = accessor.Value;
 									break;
-								case VertexElementUsage.Tangent:
-									primitive.Attributes["TANGENT"] = accessor.Value;
-									break;
-								case VertexElementUsage.Binormal:
-									primitive.Attributes["BINORMAL"] = accessor.Value;
-									break;
 								case VertexElementUsage.Normal:
 									primitive.Attributes["NORMAL"] = accessor.Value;
 									break;
+
+								// Since TANGENT/BINORMAL arent part of spec, it should start with '_'
+								// Well, actually TANGENT is part of spec, but it requires VEC4, while we have VEC3
+								case VertexElementUsage.Tangent:
+									primitive.Attributes["_TANGENT"] = accessor.Value;
+									break;
+								case VertexElementUsage.Binormal:
+									primitive.Attributes["_BINORMAL"] = accessor.Value;
+									break;
+
 
 								default:
 									throw new Exception($"Can't process {element.VertexElementUsage}");
@@ -178,12 +211,16 @@ namespace EffectFarm
 							indicesShort[i] = (ushort)indices[i];
 						}
 
-						// Unwind
-						for (var i = 0; i < indicesShort.Length; i += 3)
+						// It should be unwinded by default to meet gltf format
+						// So setting unwind option would simply prevent it
+						if (!o.Unwind)
 						{
-							var temp = indicesShort[i];
-							indicesShort[i] = indicesShort[i + 2];
-							indicesShort[i + 2] = temp;
+							for (var i = 0; i < indicesShort.Length; i += 3)
+							{
+								var temp = indicesShort[i];
+								indicesShort[i] = indicesShort[i + 2];
+								indicesShort[i + 2] = temp;
+							}
 						}
 
 						primitive.Indices = ms.WriteData(bufferViews, accessors, indicesShort.ToArray());
@@ -262,6 +299,11 @@ namespace EffectFarm
 				ByteLength = buffer.Length
 			};
 
+			if (!o.Binary)
+			{
+				buf.Uri = Path.ChangeExtension(Path.GetFileName(o.InputFile), "bin");
+			}
+
 			var scene = new Scene
 			{
 				Nodes = [0]
@@ -271,7 +313,7 @@ namespace EffectFarm
 			{
 				Asset = new Asset
 				{
-					Generator = "xnb2gltf",
+					Generator = "GltfImporter",
 					Version = "2.0",
 				},
 				Buffers = [buf],
@@ -283,19 +325,35 @@ namespace EffectFarm
 				Scene = 0
 			};
 
-			var output = Path.ChangeExtension(o.InputFile, "glb");
 
-			Debug.WriteLine(output);
-			Interface.SaveBinaryModel(gltf, buffer, output);
+			if (!o.Binary)
+			{
+				var output = Path.ChangeExtension(o.InputFile, "gltf");
+				Logger.LogMessage($"Writing {output}");
+				Interface.SaveModel(gltf, output);
+
+				output = Path.ChangeExtension(output, "bin");
+				Logger.LogMessage($"Writing {output}");
+				File.WriteAllBytes(output, buffer);
+
+				output = Path.ChangeExtension(o.InputFile, "gltf");
+
+				var model2 = Interface.LoadModel(output);
+			} else
+			{
+				var output = Path.ChangeExtension(o.InputFile, "glb");
+				Logger.LogMessage($"Writing {output}");
+				Interface.SaveBinaryModel(gltf, buffer, output);
+			}
 		}
 
 		static void Run(Options o)
 		{
 			var context = new TestImporterContext(".", ".");
-			var importer = new OpenAssetImporter();
+			var importer = new FbxImporter();
 			var root = importer.Import(o.InputFile, context);
 
-			GenerateGlb(root, o);
+			SaveGlb(root, o);
 		}
 
 		static int Process(string[] args)

@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x86</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework">
+      <HintPath>..\ThirdParty\XNA4\Microsoft.Xna.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline">
+      <HintPath>..\ThirdParty\XNA4\Microsoft.Xna.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.FbxImporter">
+      <HintPath>..\ThirdParty\XNA4\Microsoft.Xna.Framework.Content.Pipeline.FBXImporter.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.XImporter">
+      <HintPath>..\ThirdParty\XNA4\Microsoft.Xna.Framework.Content.Pipeline.XImporter.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Graphics">
+      <HintPath>..\ThirdParty\XNA4\Microsoft.Xna.Framework.Graphics.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

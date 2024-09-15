@@ -2,7 +2,7 @@
   "profiles": {
     "GltfImporter": {
       "commandName": "Project",
-      "commandLineArgs": "-i \"D:\\Projects\\RobotGame2\\SourceContent\\Models\\Mech\\Players\\FBX 2013\\Grund.FBX\""
+      "commandLineArgs": "-i \"D:\\Temp\\Models\\Yager.FBX\" -t"
     }
   }
 }
